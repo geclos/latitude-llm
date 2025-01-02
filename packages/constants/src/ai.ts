@@ -69,6 +69,7 @@ export enum ChainEventTypes {
   Step = 'chain-step',
   Complete = 'chain-complete',
   StepComplete = 'chain-step-complete',
+  ToolsCalled = 'chain-tool-call',
 }
 
 export type ProviderData =
@@ -92,6 +93,14 @@ export type ChainEventDto =
     }
   | {
       type: ChainEventTypes.Complete
+      config: Config
+      messages?: Message[]
+      object?: any
+      response: ChainEventDtoResponse
+      uuid?: string
+    }
+  | {
+      type: ChainEventTypes.ToolsCalled
       config: Config
       messages?: Message[]
       object?: any
@@ -176,16 +185,32 @@ export type LatitudeEventData =
       documentLogUuid?: string
     }
   | {
+      type: ChainEventTypes.ToolsCalled
+      config: Config
+      messages?: Message[]
+      object?: any
+      response: ChainStepResponse<StreamType>
+      documentLogUuid?: string
+    }
+  | {
       type: ChainEventTypes.Error
       error: Error
     }
 
-// FIXME: Move to @latitude-data/constants
 export type RunSyncAPIResponse = {
   uuid: string
   conversation: Message[]
   response: ChainCallResponseDto
 }
 
-// FIXME: Move to @latitude-data/constants
 export type ChatSyncAPIResponse = RunSyncAPIResponse
+
+export const toolCallResponseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  result: z.string().or(z.record(z.any())),
+  isError: z.boolean().optional(),
+  text: z.string().optional(),
+})
+
+export type ToolCallResponse = z.infer<typeof toolCallResponseSchema>

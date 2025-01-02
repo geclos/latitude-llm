@@ -125,6 +125,39 @@ export class ChainStreamConsumer {
     controller.close()
   }
 
+  static toolsCalled({
+    response,
+    config,
+    controller,
+  }: {
+    controller: ReadableStreamDefaultController
+    response: ChainStepResponse<StreamType>
+    config: Config
+  }) {
+    const content = parseResponseText(response)
+
+    enqueueChainEvent(controller, {
+      event: StreamEventTypes.Latitude,
+      data: {
+        type: ChainEventTypes.ToolsCalled,
+        config,
+        documentLogUuid: response.documentLogUuid,
+        response,
+        messages: [
+          {
+            role: MessageRole.assistant,
+            toolCalls:
+              response.streamType === 'text' ? response.toolCalls || [] : [],
+            // Review after rebase with alex's fixes
+            content,
+          },
+        ],
+      },
+    })
+
+    controller.close()
+  }
+
   static chainError({
     controller,
     e,
@@ -201,6 +234,20 @@ export class ChainStreamConsumer {
     response: ChainStepResponse<StreamType>
   }) {
     ChainStreamConsumer.chainCompleted({
+      controller: this.controller,
+      response,
+      config: step.conversation.config as Config,
+    })
+  }
+
+  toolsCalled({
+    step,
+    response,
+  }: {
+    step: ValidatedStep
+    response: ChainStepResponse<StreamType>
+  }) {
+    ChainStreamConsumer.toolsCalled({
       controller: this.controller,
       response,
       config: step.conversation.config as Config,
