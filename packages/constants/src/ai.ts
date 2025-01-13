@@ -69,7 +69,6 @@ export enum ChainEventTypes {
   Step = 'chain-step',
   Complete = 'chain-complete',
   StepComplete = 'chain-step-complete',
-  ToolsCalled = 'chain-tool-call',
 }
 
 export type ProviderData =

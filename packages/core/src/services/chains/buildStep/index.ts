@@ -70,14 +70,8 @@ export async function buildStepExecution({
     const toolCalls = getToolCalls({ response: finalResponse })
     const hasTools = isPromptl && toolCalls.length > 0
 
-    if (isPromptl && toolCalls.length > 0) {
+    if (hasTools) {
       await cacheChain({ workspace, chain, documentLogUuid, toolCalls })
-      streamConsumer.toolsCalled({
-        step,
-        response: finalResponse,
-      })
-
-      return finalResponse
     }
 
     // Instead of ChainCompleted emit chain completed with stop reason tool-call
@@ -85,6 +79,8 @@ export async function buildStepExecution({
       streamConsumer.chainCompleted({
         step,
         response: finalResponse,
+        // TODO: Add this
+        finishReason
       })
 
       return finalResponse
